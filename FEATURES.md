@@ -342,10 +342,10 @@ Items are ordered by dependency — complete phases top-to-bottom.
 
 ## Phase 2 — Networking & Parsing
 
-- [ ] **2.1** Implement `ServerQueryClient`: sends `\xFF\xFF\xFF\xFFgetstatus\n` over UDP, returns raw byte response, configurable timeout + retry count
-- [ ] **2.2** Implement `ServerResponseParser`: splits response on `\n`, extracts key/value dvars (`mapname`, `g_gametype`, `sv_maxclients`, `round`, etc.) and player lines
-- [ ] **2.3** Map parsed fields onto `ServerInfo`; derive `PlayerCount` from player line count
-- [ ] **2.4** Unit-test parser with captured real response bytes (no network required)
+- [x] **2.1** Implement `ServerQueryClient`: sends `\xFF\xFF\xFF\xFFgetstatus\n` over UDP, returns raw byte response, configurable timeout + retry count
+- [x] **2.2** Implement `ServerResponseParser`: splits response on `\n`, extracts key/value dvars (`mapname`, `g_gametype`, `sv_maxclients`, `round`, etc.) and player lines
+- [x] **2.3** Map parsed fields onto `ServerInfo`; derive `PlayerCount` from player line count
+- [x] **2.4** Unit-test parser with captured real response bytes (no network required)
 
 ---
 

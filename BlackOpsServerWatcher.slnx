@@ -2,4 +2,5 @@
   <Project Path="ServerQuery.Core/ServerQuery.Core.csproj" />
   <Project Path="ServerQuery.Data/ServerQuery.Data.csproj" />
   <Project Path="ServerQuery.UI/ServerQuery.UI.csproj" />
+  <Project Path="ServerQuery.Tests/ServerQuery.Tests.csproj" />
 </Solution>
