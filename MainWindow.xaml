@@ -6,7 +6,7 @@
         xmlns:local="clr-namespace:BlackOpsServerWatcher"
         mc:Ignorable="d"
         Title="MainWindow" Height="450" Width="800">
-    <Grid>
+    <Grid Background="#FF020202">
 
     </Grid>
 </Window>
