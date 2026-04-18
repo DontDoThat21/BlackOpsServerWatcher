@@ -1,3 +1,5 @@
 <Solution>
-  <Project Path="BlackOpsServerWatcher.csproj" />
+  <Project Path="ServerQuery.Core/ServerQuery.Core.csproj" />
+  <Project Path="ServerQuery.Data/ServerQuery.Data.csproj" />
+  <Project Path="ServerQuery.UI/ServerQuery.UI.csproj" />
 </Solution>

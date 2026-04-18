@@ -24,7 +24,7 @@ A Windows desktop application for monitoring **Plutonium Black Ops 1 (T5) Zombie
 | Language     | C#                      |
 | Networking   | UDP (UdpClient)         |
 | Persistence  | SQLite                  |
-| Notifications| Windows 11 Toasts       |
+| Notifications| Windows 11 Toasts / Sound / TTS |
 | Concurrency  | async/await + Tasks     |
 
 ---
@@ -134,29 +134,45 @@ UDP query packet:
 
 ## Trigger Condition
 
-Send a Windows toast notification when:
+Fire a notification when:
 
 - Previous state: PlayerCount == 0
 - New state: PlayerCount > 0
 
 ---
 
-## Notification Content
+## Notification Type (User-Selectable)
 
-- Title: Server Activity Detected
-- Body includes:
-  - Server name or IP
-  - Player count
-  - Map name
-  - Round (if available)
+The user selects **one** notification mode in Settings. Options are mutually exclusive.
+
+| Mode | Description |
+|------|-------------|
+| **Toast** | Windows 11 toast notification popup |
+| **Sound** | Plays a short audio chime/alert sound |
+| **Voice (TTS)** | Text-to-speech audio announcing the event |
+
+### Toast
+- Title: `Server Activity Detected`
+- Body includes server name or IP, player count, map name, and round (if available)
+- Uses Windows App SDK / `Microsoft.Toolkit.Uwp.Notifications`
+
+### Sound
+- Plays a configurable `.wav` / system sound (e.g. `SystemAsterisk`)
+- No UI popup
+
+### Voice (TTS)
+- Uses Windows `SpeechSynthesizer` (`System.Speech` or `Windows.Media.SpeechSynthesis`)
+- Speaks a short phrase constructed from live server data
+- Format: `"{Map} joined, {PlayerCount} player"` — e.g. *"Kino joined, 1 player"*
+- Phrase uses the map name as the subject and the current player count
 
 ---
 
 ## Behavior
 
 - Fires only on transition (edge-triggered)
-- No duplicate notifications
-- Resets when player count returns to 0
+- No duplicate notifications per transition
+- Resets guard when PlayerCount returns to 0
 
 ---
 
@@ -315,12 +331,12 @@ Items are ordered by dependency — complete phases top-to-bottom.
 
 ## Phase 1 — Project Structure & Models
 
-- [ ] **1.1** Create solution with three projects: `ServerQuery.Core`, `ServerQuery.Data`, `ServerQuery.UI` (rename existing project to `ServerQuery.UI`)
-- [ ] **1.2** Add `ServerInfo` model: `Id`, `Name`, `IP`, `Port`, `Status`, `PlayerCount`, `MaxPlayers`, `Round`, `Map`, `GameType`, `PingMs`, `LastUpdated`
-- [ ] **1.3** Add `ServerStatus` enum: `Unknown`, `Online`, `Offline`, `Stale`
-- [ ] **1.4** Add `PlayerInfo` model: `Name`, `Score`, `Ping`
-- [ ] **1.5** Add `QueryResult` model wrapping raw response, parsed `ServerInfo`, and a success/error flag
-- [ ] **1.6** Add NuGet packages: `Microsoft.Data.Sqlite`, `CommunityToolkit.Mvvm`
+- [x] **1.1** Create solution with three projects: `ServerQuery.Core`, `ServerQuery.Data`, `ServerQuery.UI` (rename existing project to `ServerQuery.UI`)
+- [x] **1.2** Add `ServerInfo` model: `Id`, `Name`, `IP`, `Port`, `Status`, `PlayerCount`, `MaxPlayers`, `Round`, `Map`, `GameType`, `PingMs`, `LastUpdated`
+- [x] **1.3** Add `ServerStatus` enum: `Unknown`, `Online`, `Offline`, `Stale`
+- [x] **1.4** Add `PlayerInfo` model: `Name`, `Score`, `Ping`
+- [x] **1.5** Add `QueryResult` model wrapping raw response, parsed `ServerInfo`, and a success/error flag
+- [x] **1.6** Add NuGet packages: `Microsoft.Data.Sqlite`, `CommunityToolkit.Mvvm`
 
 ---
 
@@ -354,10 +370,14 @@ Items are ordered by dependency — complete phases top-to-bottom.
 
 ## Phase 5 — Notification Service
 
-- [ ] **5.1** Implement `NotificationService` using `Microsoft.Toolkit.Uwp.Notifications` (Windows toast API)
-- [ ] **5.2** Fire notification on `PlayerCount 0 → >0` transition only (edge-triggered, no duplicates)
-- [ ] **5.3** Include server name/IP, player count, map, and round in notification body
-- [ ] **5.4** Reset notification guard when `PlayerCount` returns to 0
+- [ ] **5.1** Define `NotificationType` enum: `Toast`, `Sound`, `Voice`
+- [ ] **5.2** Implement `INotificationService` interface with a single `Notify(ServerInfo server)` method
+- [ ] **5.3** Implement `ToastNotificationService`: sends Windows 11 toast using `Microsoft.Toolkit.Uwp.Notifications`; body includes server name/IP, player count, map, and round
+- [ ] **5.4** Implement `SoundNotificationService`: plays a `.wav` file or `SystemAsterisk` system sound via `SoundPlayer` / `SystemSounds`
+- [ ] **5.5** Implement `VoiceNotificationService`: uses `System.Speech.Synthesis.SpeechSynthesizer` to speak `"{Map} joined, {PlayerCount} player"` (e.g. *"Kino joined, 1 player"*)
+- [ ] **5.6** Implement `NotificationServiceFactory`: reads `NotificationType` from settings, returns the appropriate `INotificationService`
+- [ ] **5.7** Fire notification on `PlayerCount 0 → >0` transition only (edge-triggered, no duplicates)
+- [ ] **5.8** Reset notification guard when `PlayerCount` returns to 0
 
 ---
 
@@ -366,7 +386,7 @@ Items are ordered by dependency — complete phases top-to-bottom.
 - [ ] **6.1** Implement `MainViewModel` (CommunityToolkit.Mvvm `ObservableObject`): exposes `ObservableCollection<ServerViewModel>`, commands for Add/Remove/Edit/Refresh
 - [ ] **6.2** Implement `ServerViewModel`: wraps `ServerInfo`, exposes all grid-bound properties as observable, computes `StatusColor` brush from `Status`
 - [ ] **6.3** Implement `AddServerViewModel` + dialog: fields for IP, Port, Name; inline validation messages
-- [ ] **6.4** Implement `SettingsViewModel`: exposes query interval, timeout, max concurrent calls; persists to `appsettings.json` or SQLite key-value table
+- [ ] **6.4** Implement `SettingsViewModel`: exposes query interval, timeout, max concurrent calls, and `NotificationType` (Toast / Sound / Voice); persists to `appsettings.json` or SQLite key-value table
 - [ ] **6.5** Subscribe `MainViewModel` to `QueryScheduler.ServerUpdated`; dispatch UI updates on the WPF dispatcher
 
 ---
@@ -381,7 +401,7 @@ Items are ordered by dependency — complete phases top-to-bottom.
 - [ ] **7.6** Toolbar buttons: **Add**, **Remove** (enabled only when row selected), **Edit** (enabled only when row selected), **Refresh All**
 - [ ] **7.7** Status bar: show total servers, online count, last global refresh time
 - [ ] **7.8** Build `AddEditServerDialog` (modal `Window` or `Popup`)
-- [ ] **7.9** Build `SettingsDialog` with sliders/spinners for query interval and timeout
+- [ ] **7.9** Build `SettingsDialog` with sliders/spinners for query interval and timeout, plus a radio-button group for notification type (Toast / Sound / Voice)
 
 ---
 

@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
@@ -6,6 +6,17 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <UseWPF>true</UseWPF>
+    <RootNamespace>ServerQuery.UI</RootNamespace>
+    <AssemblyName>ServerQuery.UI</AssemblyName>
   </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\ServerQuery.Core\ServerQuery.Core.csproj" />
+    <ProjectReference Include="..\ServerQuery.Data\ServerQuery.Data.csproj" />
+  </ItemGroup>
 
 </Project>

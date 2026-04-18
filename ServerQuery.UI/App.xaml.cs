@@ -2,7 +2,7 @@
 using System.Data;
 using System.Windows;
 
-namespace BlackOpsServerWatcher
+namespace ServerQuery.UI
 {
     /// <summary>
     /// Interaction logic for App.xaml
